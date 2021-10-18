@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "recipes"
+version = "0.0.1"
+description = ""
+authors = ["cfeenstra67 <cameron.l.feenstra@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+recipe-scrapers = "^13.5.0"
+Scrapy = "^2.5.1"
+lxml = "^4.6.3"
+cssselect = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
