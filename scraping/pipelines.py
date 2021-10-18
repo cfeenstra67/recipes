@@ -26,8 +26,8 @@ class RecipePipeline:
         self.overwrite = overwrite
 
     def process_item(
-        self, item: RecipeItem, spider: scrapy.Spider
-    ) -> scrapy.Item:  # pylint: disable=unused-argument
+        self, item: RecipeItem, spider: scrapy.Spider  # pylint: disable=unused-argument
+    ) -> scrapy.Item:
         json_data = dict(item)
         encoded_html = base64.b64encode(item["html"]).decode()
         json_data["html"] = encoded_html
@@ -36,13 +36,13 @@ class RecipePipeline:
         return item
 
     def open_spider(
-        self, spider: scrapy.Spider
-    ) -> None:  # pylint: disable=unused-argument
+        self, spider: scrapy.Spider  # pylint: disable=unused-argument
+    ) -> None:
         mode = "w+" if self.overwrite else "a+"
         self.stream = open(self.output_file, mode, encoding="utf-8")
 
     def close_spider(
-        self, spider: scrapy.Spider
-    ) -> None:  # pylint: disable=unused-argument
+        self, spider: scrapy.Spider  # pylint: disable=unused-argument
+    ) -> None:
         self.stream.close()
         self.stream = None

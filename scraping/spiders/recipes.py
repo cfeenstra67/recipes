@@ -37,7 +37,9 @@ class RecipeSpider(scrapy.Spider):
         # site_listers.CookieAndKateLister(),
         # site_listers.CookStrLister(),
         # site_listers.EatingBirdFoodLister(),
-        site_listers.EatSmarterLister(),
+        # site_listers.EatSmarterLister(),
+        # site_listers.EatWhatTonightLister(),
+        site_listers.EpicuriousLister(),
     ]
 
     def start_requests(self) -> Iterator[Any]:

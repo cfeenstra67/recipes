@@ -28,9 +28,9 @@ def patch_abstract_scraper() -> None:
         url: str,
         page_data: str,
         proxies: Optional[str] = None,  # pylint: disable=unused-argument
-        timeout: Optional[
+        timeout: Optional[  # pylint: disable=unused-argument
             Union[float, Tuple]
-        ] = None,  # pylint: disable=unused-argument
+        ] = None,
         wild_mode: Optional[bool] = False,
     ) -> None:
 
