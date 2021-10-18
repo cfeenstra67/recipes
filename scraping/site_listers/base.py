@@ -1,10 +1,13 @@
 import abc
-from typing import Iterator, Any, Sequence
+import logging
+from typing import Iterator, Any, Sequence, Callable
 from urllib.parse import urljoin
 
 import scrapy
 from lxml import html
 
+
+LOGGER = logging.getLogger(__name__)
 
 PageCallback = Callable[[scrapy.http.Response], Iterator[Any]]
 
@@ -13,6 +16,7 @@ class SiteLister(abc.ABC):
     """
     An object that will iterate through all recipes on a site
     """
+
     start_url: str
 
     @abc.abstractmethod
@@ -25,28 +29,24 @@ class SiteLister(abc.ABC):
 
 
 class StructuredSiteLister(SiteLister):
-    """
-    """
+    """ """
+
     @abc.abstractmethod
     def get_links(self, dom: html.Element) -> Sequence[str]:
-        """
-        """
+        """ """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:
-        """
-        """
+        """ """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_page_url(self, page: int) -> str:
-        """
-        """
+        """ """
         raise NotImplementedError
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-
         def parse_list_page(response, page: int = 1):
             html_data = html.fromstring(response.body)
 
@@ -57,7 +57,7 @@ class StructuredSiteLister(SiteLister):
                         self.get_page_url(page_num),
                         callback=parse_list_page,
                         cb_kwargs={"page": page_num},
-                        dont_filter=True
+                        dont_filter=True,
                     )
             else:
                 LOGGER.warning("No new page numbers found on page %d", page)

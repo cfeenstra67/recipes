@@ -1,7 +1,6 @@
 import logging
-import re
 from typing import Iterator
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import scrapy
 from lxml import html
@@ -13,12 +12,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BowlOfDeliciousLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.bowlofdelicious.com/category/recipes/"
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-
         def parse_single_list_page(response):
             html_data = html.fromstring(response.body)
             for link in html_data.cssselect("main.content > article.post a"):
@@ -43,9 +41,11 @@ class BowlOfDeliciousLister(SiteLister):
                     yield scrapy.Request(
                         f"{self.start_url}page/{page_num}",
                         callback=parse_single_list_page,
-                        dont_filter=True
+                        dont_filter=True,
                     )
 
             yield from parse_single_list_page(response)
 
-        yield scrapy.Request(self.start_url, callback=parse_first_list_page, dont_filter=True)
+        yield scrapy.Request(
+            self.start_url, callback=parse_first_list_page, dont_filter=True
+        )

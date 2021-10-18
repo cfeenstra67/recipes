@@ -13,14 +13,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ArchanasKitchenLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.archanaskitchen.com/recipes"
 
     page_url_regex = re.compile(r"^/recipes/page-(\d+)$")
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-
         def parse_single_list_page(response):
             html_data = html.fromstring(response.body)
 
@@ -33,7 +32,7 @@ class ArchanasKitchenLister(SiteLister):
 
             html_data = html.fromstring(response.body)
 
-            end_link = html_data.find(".//div[@class=\"pagination\"]//a[@title=\"End\"]")
+            end_link = html_data.find('.//div[@class="pagination"]//a[@title="End"]')
             if end_link is None:
                 LOGGER.error("Unable to find last page.")
                 yield from parse_single_list_page(response)
@@ -42,7 +41,9 @@ class ArchanasKitchenLister(SiteLister):
             parsed_link = urlparse(end_link.attrib["href"])
             match = self.page_url_regex.search(parsed_link.path)
             if not match:
-                LOGGER.error("No match found for page number in path: %s", parsed_link.path)
+                LOGGER.error(
+                    "No match found for page number in path: %s", parsed_link.path
+                )
                 yield from parse_single_list_page(response)
                 return
 
@@ -54,9 +55,11 @@ class ArchanasKitchenLister(SiteLister):
                 yield scrapy.Request(
                     f"{self.start_url}/page-{page_num}",
                     callback=parse_single_list_page,
-                    dont_filter=True
+                    dont_filter=True,
                 )
 
             yield from parse_single_list_page(response)
 
-        yield scrapy.Request(self.start_url, callback=parse_first_list_page, dont_filter=True)
+        yield scrapy.Request(
+            self.start_url, callback=parse_first_list_page, dont_filter=True
+        )

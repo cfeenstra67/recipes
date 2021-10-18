@@ -13,8 +13,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BonAppetitLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.bonappetit.com/sitemap.xml"
 
     recipe_url_regex = re.compile(r"^/recipe/.+$")
@@ -38,7 +38,7 @@ class BonAppetitLister(SiteLister):
                 yield scrapy.Request(
                     urljoin(response.url, location.text),
                     callback=parse_individual_sitemap,
-                    dont_filter=True
+                    dont_filter=True,
                 )
 
         yield scrapy.Request(self.start_url, callback=parse_sitemap, dont_filter=True)

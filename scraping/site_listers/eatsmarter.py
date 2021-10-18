@@ -12,12 +12,12 @@ from scraping.site_listers.base import PageCallback, SiteLister
 LOGGER = logging.getLogger(__name__)
 
 
-class BBCGoodFoodLister(SiteLister):
+class EatSmarterLister(SiteLister):
     """ """
 
-    start_url = "https://www.bbcgoodfood.com/sitemap.xml"
+    start_url = "https://eatsmarter.com/sitemap.xml"
 
-    recipe_url_regex = re.compile(r"^/recipes/.+$")
+    recipe_url_regex = re.compile(r"^/recipes/[^/]+$")
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
 

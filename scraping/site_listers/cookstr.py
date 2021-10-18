@@ -1,9 +1,6 @@
 import logging
-import re
 from typing import Sequence
-from urllib.parse import urljoin, urlparse
 
-import scrapy
 from lxml import html
 
 from scraping.site_listers.base import StructuredSiteLister
@@ -13,15 +10,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CookStrLister(StructuredSiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.cookstr.com/recipes"
 
     def get_links(self, dom: html.Element) -> Sequence[str]:
         return [
-            element.attrib["href"] for element in dom.cssselect(
-                "div.articleList2 > div.articleDiv > h4 > a"
-            )
+            element.attrib["href"]
+            for element in dom.cssselect("div.articleList2 > div.articleDiv > h4 > a")
         ]
 
     def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:
@@ -29,9 +25,9 @@ class CookStrLister(StructuredSiteLister):
             return []
 
         pages = []
-        for el in dom.cssselect("div.paginationDiv > ul > li > a > span"):
+        for element in dom.cssselect("div.paginationDiv > ul > li > a > span"):
             try:
-                pages.append(int(el.text))
+                pages.append(int(element.text))
             except (ValueError, TypeError):
                 pass
 

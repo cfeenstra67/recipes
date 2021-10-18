@@ -17,3 +17,4 @@ from scraping.site_listers.cookeatshare import CookEatShareLister
 from scraping.site_listers.cookieandkate import CookieAndKateLister
 from scraping.site_listers.cookstr import CookStrLister
 from scraping.site_listers.eatingbirdfood import EatingBirdFoodLister
+from scraping.site_listers.eatsmarter import EatSmarterLister

@@ -12,12 +12,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ACoupleCooksLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.acouplecooks.com/category/recipes/"
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-
         def handle_list_page(response: scrapy.http.Response, page: int = 1):
             if response.status == 404:
                 LOGGER.info("Page %d does not exist, exiting", page)
@@ -28,7 +27,7 @@ class ACoupleCooksLister(SiteLister):
                 f"{self.start_url}?_paged={next_page}",
                 callback=handle_list_page,
                 cb_kwargs={"page": next_page},
-                dont_filter=True
+                dont_filter=True,
             )
 
             html_data = html.fromstring(response.body)
@@ -37,6 +36,8 @@ class ACoupleCooksLister(SiteLister):
             ):
                 link = post.cssselect("a")[0].attrib["href"]
                 absolute_link = urljoin(response.url, link)
-                yield scrapy.Request(link, callback=page_callback)
+                yield scrapy.Request(absolute_link, callback=page_callback)
 
-        yield scrapy.Request(self.start_url, callback=handle_list_page, dont_filter=True)
+        yield scrapy.Request(
+            self.start_url, callback=handle_list_page, dont_filter=True
+        )

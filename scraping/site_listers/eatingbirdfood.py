@@ -1,9 +1,6 @@
 import logging
-import re
 from typing import Sequence
-from urllib.parse import urljoin, urlparse
 
-import scrapy
 from lxml import html
 
 from scraping.site_listers.base import StructuredSiteLister
@@ -13,13 +10,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 class EatingBirdFoodLister(StructuredSiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.eatingbirdfood.com/recipe-index/"
 
     def get_links(self, dom: html.Element) -> Sequence[str]:
         return [
-            element.attrib["href"] for element in dom.cssselect(
+            element.attrib["href"]
+            for element in dom.cssselect(
                 "div.search-filter-results > div.single-posty > a"
             )
         ]

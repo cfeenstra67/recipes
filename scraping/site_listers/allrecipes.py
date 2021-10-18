@@ -13,8 +13,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AllRecipesLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.allrecipes.com/sitemap.xml"
 
     recipe_map_regex = re.compile(r"^/sitemaps/recipe/\d+/sitemap\.xml$")
@@ -26,7 +26,9 @@ class AllRecipesLister(SiteLister):
         def parse_individual_sitemap(response: scrapy.http.Response):
             tree = etree.fromstring(response.body)
             for location in tree.findall(".//sm:url/sm:loc", namespaces=namespaces):
-                yield scrapy.Request(urljoin(response.url, location.text), callback=page_callback)
+                yield scrapy.Request(
+                    urljoin(response.url, location.text), callback=page_callback
+                )
 
         def parse_sitemap(response: scrapy.http.Response):
             tree = etree.fromstring(response.body)
@@ -35,9 +37,7 @@ class AllRecipesLister(SiteLister):
                 if not self.recipe_map_regex.search(parsed_url.path):
                     continue
                 yield scrapy.Request(
-                    location.text,
-                    callback=parse_individual_sitemap,
-                    dont_filter=True
+                    location.text, callback=parse_individual_sitemap, dont_filter=True
                 )
 
         yield scrapy.Request(self.start_url, callback=parse_sitemap, dont_filter=True)

@@ -14,7 +14,8 @@ class RecipeSpider(scrapy.Spider):
     """
     Spider for scraping recipe data
     """
-    name = 'recipes'
+
+    name = "recipes"
 
     recipe_generators = [
         # site_listers.ACoupleCooksLister(),
@@ -35,7 +36,8 @@ class RecipeSpider(scrapy.Spider):
         # site_listers.CookEatShareLister(),
         # site_listers.CookieAndKateLister(),
         # site_listers.CookStrLister(),
-        site_listers.EatingBirdFoodLister(),
+        # site_listers.EatingBirdFoodLister(),
+        site_listers.EatSmarterLister(),
     ]
 
     def start_requests(self) -> Iterator[Any]:
@@ -43,10 +45,7 @@ class RecipeSpider(scrapy.Spider):
             yield from generator.start_requests(self.parse)
 
     def parse(self, response: scrapy.http.Response) -> Iterator[Any]:
-        scraper = scrape_me(
-            response.url,
-            page_data=response.body
-        )
+        scraper = scrape_me(response.url, page_data=response.body)
 
         def get_method_result(func):
             try:
@@ -63,7 +62,7 @@ class RecipeSpider(scrapy.Spider):
             "image": get_method_result(scraper.image),
             "host": get_method_result(scraper.host),
             "links": get_method_result(scraper.links),
-            "nutrients": get_method_result(scraper.nutrients)
+            "nutrients": get_method_result(scraper.nutrients),
         }
 
         item_dict = {}
@@ -87,9 +86,6 @@ class RecipeSpider(scrapy.Spider):
                 LOGGER.error("%s does not have a %s", response.url, field)
                 return
 
-        item_dict.update({
-            "html": response.body,
-            "url": response.url
-        })
+        item_dict.update({"html": response.body, "url": response.url})
 
         yield items.RecipeItem(**item_dict)

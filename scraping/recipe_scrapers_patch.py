@@ -12,25 +12,25 @@ from recipe_scrapers.settings import settings
 
 
 def patch_scrapers() -> None:
-    """
-    """
+    """ """
     patch_abstract_scraper()
     patch_betty_crocker()
 
 
 def patch_abstract_scraper() -> None:
-    """
-    """
+    """ """
     if not hasattr(AbstractScraper, "__original_init__"):
         AbstractScraper.__original_init__ = AbstractScraper.__init__
 
     @wraps(AbstractScraper.__original_init__)
-    def new_init(
+    def new_init(  # pylint: disable=too-many-arguments
         self,
         url: str,
         page_data: str,
-        proxies: Optional[str] = None,
-        timeout: Optional[Union[float, Tuple]] = None,
+        proxies: Optional[str] = None,  # pylint: disable=unused-argument
+        timeout: Optional[
+            Union[float, Tuple]
+        ] = None,  # pylint: disable=unused-argument
         wild_mode: Optional[bool] = False,
     ) -> None:
 
@@ -41,7 +41,7 @@ def patch_abstract_scraper() -> None:
 
         # attach the plugins as instructed in settings.PLUGINS
         if not hasattr(self.__class__, "plugins_initialized"):
-            for name, func in inspect.getmembers(self, inspect.ismethod):
+            for name, _ in inspect.getmembers(self, inspect.ismethod):
                 current_method = getattr(self.__class__, name)
                 for plugin in reversed(settings.PLUGINS):
                     if plugin.should_run(self.host(), name):
@@ -52,13 +52,13 @@ def patch_abstract_scraper() -> None:
     AbstractScraper.__init__ = new_init
 
 
-class PatchedBettyCrocker(BettyCrocker):
-    """
-    """
+class PatchedBettyCrocker(BettyCrocker):  # pylint: disable=abstract-method
+    """ """
+
     def ingredients(self):
-        ingredients = self.soup.find(
-            "div", {"class": "rdpIngredients"}
-        ).ul.findAll("li")
+        ingredients = self.soup.find("div", {"class": "rdpIngredients"}).ul.findAll(
+            "li"
+        )
 
         return [
             normalize_string(
@@ -71,6 +71,5 @@ class PatchedBettyCrocker(BettyCrocker):
 
 
 def patch_betty_crocker() -> None:
-    """
-    """
+    """ """
     SCRAPERS[BettyCrocker.host()] = PatchedBettyCrocker

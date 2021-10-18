@@ -1,7 +1,6 @@
 import logging
-import re
 from typing import Iterator
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import scrapy
 from lxml import etree
@@ -13,8 +12,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BettyCrockerLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.bettycrocker.com/recipe.xml"
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
@@ -27,7 +26,7 @@ class BettyCrockerLister(SiteLister):
                 yield scrapy.Request(
                     urljoin(response.url, location.text),
                     callback=page_callback,
-                    dont_filter=True
+                    dont_filter=True,
                 )
 
         yield scrapy.Request(self.start_url, callback=parse_sitemap, dont_filter=True)

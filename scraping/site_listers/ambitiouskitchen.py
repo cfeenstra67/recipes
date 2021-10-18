@@ -13,14 +13,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AmbitiousKitchenLister(SiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.ambitiouskitchen.com/recipe-index/"
 
     multi_recipe_regex = re.compile(r"^/[^/]*?(recipes|meals).+$", re.I)
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-
         def parse_list_page(response, page=1):
 
             html_data = html.fromstring(response.body)
@@ -32,7 +31,7 @@ class AmbitiousKitchenLister(SiteLister):
                 yield scrapy.Request(
                     f"{self.start_url}?sf_paged={next_page}",
                     callback=parse_list_page,
-                    cb_kwargs={"page": next_page}
+                    cb_kwargs={"page": next_page},
                 )
             else:
                 LOGGER.info("Exiting after page %d", page)

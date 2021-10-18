@@ -7,8 +7,8 @@ import scrapy
 
 
 class RecipeItem(scrapy.Item):
-    """
-    """
+    """ """
+
     title = scrapy.Field()
     total_time = scrapy.Field()
     yields = scrapy.Field()
