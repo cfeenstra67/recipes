@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Iterator, Any
 
 import scrapy
@@ -39,7 +40,36 @@ class RecipeSpider(scrapy.Spider):
         # site_listers.EatingBirdFoodLister(),
         # site_listers.EatSmarterLister(),
         # site_listers.EatWhatTonightLister(),
-        site_listers.EpicuriousLister(),
+        # site_listers.EpicuriousLister(),
+        # site_listers.FoodLister(),
+        # site_listers.FoodNetworkLister(),
+        # site_listers.FoodRepublicLister(),
+        # site_listers.ForksOverKnivesLister(),
+        # site_listers.GimmeSomeOvenLister(),
+        # site_listers.GonnaWantSecondsLister(),
+        # site_listers.GreatBritishChefsLister(),
+        # site_listers.HalfBakedHarvestLister(),
+        # site_listers.HeadBangersKitchenLister(),
+        # site_listers.HelloFreshLister(),
+        # site_listers.HostTheToastLister(),
+        # site_listers.IndianHealthyRecipesLister(),
+        # site_listers.InnitLister(),
+        # site_listers.JamieOliverLister(),
+        # site_listers.JimCooksGoodFoodLister(),
+        # site_listers.JoyFoodSunshineLister(),
+        # site_listers.JustATasteLister(),
+        # site_listers.JustBentoLister(),
+        # site_listers.KennyMcgovernLister(),
+        # site_listers.KingArthurBakingLister(),
+        # site_listers.LeCremeDeLaCrumbLister(),
+        # site_listers.LittleSpiceJarLister(),
+        # site_listers.LivelyTableLister(),
+        # site_listers.LovingItVeganLister(),
+        # site_listers.MarthaStewartLister(),
+        # site_listers.MelsKitchenCafeLister(),
+        # site_listers.MinimalistBakerLister(),
+        # site_listers.MomsWithCrockpotsLister(),
+        site_listers.MyBakingAddictionLister(),
     ]
 
     def start_requests(self) -> Iterator[Any]:
@@ -88,6 +118,6 @@ class RecipeSpider(scrapy.Spider):
                 LOGGER.error("%s does not have a %s", response.url, field)
                 return
 
-        item_dict.update({"html": response.body, "url": response.url})
+        item_dict.update({"html": response.body, "url": response.url, "accessed_at": datetime.utcnow().isoformat()})
 
         yield items.RecipeItem(**item_dict)

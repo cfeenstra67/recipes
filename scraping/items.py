@@ -20,3 +20,4 @@ class RecipeItem(scrapy.Item):
     nutrients = scrapy.Field()
     html = scrapy.Field()
     url = scrapy.Field()
+    accessed_at = scrapy.Field()
