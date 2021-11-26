@@ -6,15 +6,17 @@ from scraping.site_listers.base import StructuredSiteLister
 
 
 class JustBentoLister(StructuredSiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://justbento.com/recipes/all"
     start_page = 0
 
     def get_links(self, dom: html.Element) -> Sequence[str]:
         return [
             element.attrib["href"]
-            for element in dom.cssselect("table.views-table tbody > tr > td.views-field-title > a")
+            for element in dom.cssselect(
+                "table.views-table tbody > tr > td.views-field-title > a"
+            )
         ]
 
     def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:

@@ -9,17 +9,14 @@ from scraping.site_listers.base import PageCallback, SitemapLister
 
 
 class MyBakingAddictionLister(SitemapLister):
-    """
-    """
+    """ """
+
     start_url = "https://www.mybakingaddiction.com/sitemap.xml"
     sitemap_path_regex = re.compile(r"^/sitemap-pt-post-\d+-\d+\.xml$")
 
     def process_start_urls(
-        self,
-        urls: Sequence[str],
-        callback: PageCallback
+        self, urls: Sequence[str], callback: PageCallback
     ) -> Iterator[scrapy.Request]:
-        
         def get_sitemaps(response):
             tree = etree.fromstring(response.body)
             for relative_url in self.get_sitemap_urls(tree):

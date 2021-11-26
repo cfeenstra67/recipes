@@ -31,6 +31,7 @@ class SiteLister(abc.ABC):
 
 class StructuredSiteLister(SiteLister):
     """ """
+
     start_page: int = 1
 
     @abc.abstractmethod
@@ -83,9 +84,7 @@ class SitemapLister(SiteLister):
         return [self.start_url] + list(self.extra_start_urls)
 
     def process_start_urls(
-        self,
-        urls: Sequence[str],
-        callback: PageCallback
+        self, urls: Sequence[str], callback: PageCallback
     ) -> Iterator[scrapy.Request]:
         for url in urls:
             yield scrapy.Request(url, callback=callback, dont_filter=True)
@@ -97,13 +96,10 @@ class SitemapLister(SiteLister):
             yield location.text
 
     def get_page_urls(self, tree: etree.Element) -> Iterator[str]:
-        for location in tree.findall(
-            ".//sm:url/sm:loc", namespaces=self.namespaces
-        ):
+        for location in tree.findall(".//sm:url/sm:loc", namespaces=self.namespaces):
             yield location.text
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-        
         def parse_sitemap(response: scrapy.http.Response):
             tree = etree.fromstring(response.body)
             for relative_url in self.get_page_urls(tree):

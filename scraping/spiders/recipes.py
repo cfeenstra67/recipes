@@ -118,6 +118,12 @@ class RecipeSpider(scrapy.Spider):
                 LOGGER.error("%s does not have a %s", response.url, field)
                 return
 
-        item_dict.update({"html": response.body, "url": response.url, "accessed_at": datetime.utcnow().isoformat()})
+        item_dict.update(
+            {
+                "html": response.body,
+                "url": response.url,
+                "accessed_at": datetime.utcnow().isoformat(),
+            }
+        )
 
         yield items.RecipeItem(**item_dict)
