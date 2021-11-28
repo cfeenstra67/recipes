@@ -21,7 +21,7 @@ class CookStrLister(StructuredSiteLister):
         ]
 
     def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:
-        if page > 1:
+        if page > self.start_page:
             return []
 
         pages = []

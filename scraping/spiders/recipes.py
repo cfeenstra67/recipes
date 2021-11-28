@@ -69,15 +69,69 @@ class RecipeSpider(scrapy.Spider):
         # site_listers.MelsKitchenCafeLister(),
         # site_listers.MinimalistBakerLister(),
         # site_listers.MomsWithCrockpotsLister(),
-        site_listers.MyBakingAddictionLister(),
+        # site_listers.MyBakingAddictionLister(),
+        # site_listers.MyRecipesLister(),
+        # site_listers.NourishedByNutritionLister(),
+        # site_listers.NutritionByNathalieLister(),
+        # site_listers._101CookbooksLister(),
+        # site_listers.PaleoRunningMommaLister(),
+        # site_listers.PaniniHappyLister(),
+        # site_listers.PracticalSelfRelianceLister(),
+        # site_listers.PrimalEdgeHealthLister(),
+        # site_listers.PurelyPopeLister(),
+        # site_listers.PurpleCarrotLister(),
+        # site_listers.RachlmansFieldLister(),
+        # site_listers.RainbowPlantLifeLister(),
+        # site_listers.RealSimpleLister(),
+        # site_listers.RecipeTinEatsLister(),
+        # site_listers.RedHouseSpiceLister(),
+        # site_listers.SallysBakingAddictionLister(),
+        # site_listers.SaveurLister(),
+        # site_listers.SeriousEatsLister(),
+        # site_listers.SimplyQuinoaLister(),
+        # site_listers.SimplyRecipesLister(),
+        # site_listers.SimplyWhiskedLister(),
+        # site_listers.SkinnyTasteLister(),
+        # site_listers.SouthernLivingLister(),
+        # site_listers.SpendWithPenniesLister(),
+        # site_listers.SteamyKitchenLister(),
+        # site_listers.SunBasketLister(),
+        # site_listers.SweetCsDesignsLister(),
+        # site_listers.SweetPeasAndSaffronLister(),
+        # site_listers.TasteOfHomeLister(),
+        # site_listers.TastesOfLizzyTLister(),
+        # site_listers.TastyKitchenLister(),
+        # site_listers.TheCleverCarrotLister(),
+        # site_listers.TheHappyFoodieLister(),
+        # site_listers.TheKitchenMagpieLister(),
+        # site_listers.TheKitchnLister(),
+        # site_listers.TheNutritiousKitchenLister(),
+        # site_listers.TheSpruceEatsLister(),
+        # site_listers.TheVintageMixerLister(),
+        # site_listers.TheWoksOfLifeLister(),
+        # site_listers.TwoPeasAndTheirPodLister(),
+        # site_listers.VanillaAndBeanLister(),
+        # site_listers.VegRecipesOfIndiaLister(),
+        # site_listers.WatchWhatUEatLister(),
+        # site_listers.WhatsGabyCookingLister(),
+        # site_listers.WholeFoodsMarketLister(),
+        site_listers.WikibooksLister(),
     ]
 
     def start_requests(self) -> Iterator[Any]:
+        # TODO: iterate through these "horizontally" so each generator
+        # yields one request at once, should help slightly to distribute
+        # requests
         for generator in self.recipe_generators:
             yield from generator.start_requests(self.parse)
 
     def parse(self, response: scrapy.http.Response) -> Iterator[Any]:
-        scraper = scrape_me(response.url, page_data=response.body)
+
+        try:
+            scraper = scrape_me(response.url, page_data=response.body)
+        except Exception:
+            LOGGER.exception("Error creating scraper for %s", response.url)
+            return
 
         def get_method_result(func):
             try:
@@ -114,7 +168,7 @@ class RecipeSpider(scrapy.Spider):
             return
 
         for field in ["title", "ingredients", "instructions"]:
-            if item_dict[field] is None:
+            if not item_dict[field]:
                 LOGGER.error("%s does not have a %s", response.url, field)
                 return
 

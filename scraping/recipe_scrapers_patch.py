@@ -8,6 +8,8 @@ from recipe_scrapers._abstract import AbstractScraper
 from recipe_scrapers._schemaorg import SchemaOrg
 from recipe_scrapers._utils import normalize_string
 from recipe_scrapers.bettycrocker import BettyCrocker
+from recipe_scrapers.onehundredonecookbooks import OneHundredOneCookBooks
+from recipe_scrapers.recipietineats import RecipieTinEats
 from recipe_scrapers.settings import settings
 
 
@@ -15,6 +17,8 @@ def patch_scrapers() -> None:
     """ """
     patch_abstract_scraper()
     patch_betty_crocker()
+    patch_onehundredonecookbooks()
+    patch_recipetineats()
 
 
 def patch_abstract_scraper() -> None:
@@ -70,6 +74,29 @@ class PatchedBettyCrocker(BettyCrocker):  # pylint: disable=abstract-method
         ]
 
 
+class PatchedOneHundredOneCookbooks(OneHundredOneCookBooks):
+    """
+    Failing case: https://www.101cookbooks.com/millionaires-shortbread/
+    """
+    def title(self):
+        title = self.soup.find("h1")
+        if title is None:
+            title = self.soup.find("h2")
+        return title.get_text()
+
+
 def patch_betty_crocker() -> None:
     """ """
     SCRAPERS[BettyCrocker.host()] = PatchedBettyCrocker
+
+
+def patch_onehundredonecookbooks() -> None:
+    """
+    """
+    SCRAPERS[OneHundredOneCookBooks.host()] = PatchedOneHundredOneCookbooks
+
+
+def patch_recipetineats() -> None:
+    """
+    """
+    SCRAPERS["recipetineats.com"] = RecipieTinEats

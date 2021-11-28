@@ -20,7 +20,7 @@ class JustBentoLister(StructuredSiteLister):
         ]
 
     def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:
-        if page > 0:
+        if page > self.start_page:
             return []
 
         pager_items = dom.cssselect("ul.pager > li.pager-item > a")

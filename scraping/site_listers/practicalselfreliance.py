@@ -3,8 +3,8 @@ import re
 from scraping.site_listers.base import TwoLevelSitemapLister
 
 
-class MyBakingAddictionLister(TwoLevelSitemapLister):
+class PracticalSelfRelianceLister(TwoLevelSitemapLister):
     """ """
 
-    start_url = "https://www.mybakingaddiction.com/sitemap.xml"
+    start_url = "https://practicalselfreliance.com/sitemap.xml"
     sitemap_path_regex = re.compile(r"^/sitemap-pt-post-\d+-\d+\.xml$")

@@ -40,34 +40,38 @@ class StructuredSiteLister(SiteLister):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_pages(self, dom: html.Element, page: int) -> Sequence[int]:
+    def get_pages(self, dom: html.Element, page: Any) -> Sequence[Any]:
         """ """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_page_url(self, page: int) -> str:
+    def get_page_url(self, page: Any) -> str:
         """ """
         raise NotImplementedError
 
     def start_requests(self, page_callback: PageCallback) -> Iterator[scrapy.Request]:
-        def parse_list_page(response, page: int = self.start_page):
+        def parse_list_page(response, page: Any = self.start_page):
             html_data = html.fromstring(response.body)
 
-            new_pages = self.get_pages(html_data, page)
-            if new_pages:
-                for page_num in new_pages:
-                    yield scrapy.Request(
-                        self.get_page_url(page_num),
-                        callback=parse_list_page,
-                        cb_kwargs={"page": page_num},
-                        dont_filter=True,
-                    )
-            else:
-                LOGGER.warning("No new page numbers found on page %d", page)
+            new_pages = list(self.get_pages(html_data, page))
 
             for link in self.get_links(html_data):
                 url = urljoin(response.url, link)
                 yield scrapy.Request(url, callback=page_callback)
+
+            if not new_pages:
+                LOGGER.warning("No new page numbers found on page %s", page)
+                return
+
+            for page_num in new_pages:
+                if page == page_num:
+                    continue
+                yield scrapy.Request(
+                    self.get_page_url(page_num),
+                    callback=parse_list_page,
+                    cb_kwargs={"page": page_num},
+                    dont_filter=True,
+                )
 
         yield scrapy.Request(self.start_url, callback=parse_list_page, dont_filter=True)
 
@@ -89,12 +93,6 @@ class SitemapLister(SiteLister):
         for url in urls:
             yield scrapy.Request(url, callback=callback, dont_filter=True)
 
-    def get_sitemap_urls(self, tree: etree.Element) -> Iterator[str]:
-        for location in tree.findall(
-            ".//sm:sitemap/sm:loc", namespaces=self.namespaces
-        ):
-            yield location.text
-
     def get_page_urls(self, tree: etree.Element) -> Iterator[str]:
         for location in tree.findall(".//sm:url/sm:loc", namespaces=self.namespaces):
             yield location.text
@@ -114,3 +112,30 @@ class SitemapLister(SiteLister):
 
         start_urls = self.get_start_urls()
         yield from self.process_start_urls(start_urls, parse_sitemap)
+
+
+class TwoLevelSitemapLister(SitemapLister):
+    """
+    """
+
+    sitemap_path_regex: Optional[re.Pattern] = None
+
+    def get_sitemap_urls(self, tree: etree.Element) -> Iterator[str]:
+        for location in tree.findall(
+            ".//sm:sitemap/sm:loc", namespaces=self.namespaces
+        ):
+            yield location.text
+
+    def process_start_urls(
+        self, urls: Sequence[str], callback: PageCallback
+    ) -> Iterator[scrapy.Request]:
+        def get_sitemaps(response):
+            tree = etree.fromstring(response.body)
+            for relative_url in self.get_sitemap_urls(tree):
+                url = urljoin(response.url, relative_url)
+                parsed_url = urlparse(url)
+                if not self.sitemap_path_regex.search(parsed_url.path):
+                    continue
+                yield scrapy.Request(url, callback=callback, dont_filter=True)
+
+        yield from super().process_start_urls(urls, get_sitemaps)
