@@ -7,8 +7,8 @@ from scraping.site_listers.base import StructuredSiteLister
 
 
 class WikibooksLister(StructuredSiteLister):
-    """
-    """
+    """ """
+
     start_url = "https://en.wikibooks.org/wiki/Category:Recipes"
 
     def get_links(self, dom: html.Element) -> Sequence[str]:

@@ -6,17 +6,12 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
 
-BOT_NAME = "scraping"
+BOT_NAME = "recipes-scraper"
 
 SPIDER_MODULES = ["scraping.spiders"]
 NEWSPIDER_MODULE = "scraping.spiders"
-
-JSON_OUTPUT_FILE = "recipes.json"
-
-ERRORS_OUTPUT_FILE = "recipe_error_urls.txt"
-
-OVERWRITE_OUTPUT_FILES = True
 
 LOG_LEVEL = "INFO"
 
@@ -26,10 +21,10 @@ USER_AGENT = (
 )
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 100
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -40,7 +35,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 2
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 # TELNETCONSOLE_ENABLED = False
@@ -59,9 +54,9 @@ SPIDER_MIDDLEWARES = {
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'scraping.middlewares.ScrapingDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "scraping.middlewares.ScraperApiProxy": 543
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -75,16 +70,35 @@ ITEM_PIPELINES = {
     "scraping.pipelines.RecipePipeline": 300,
 }
 
+# Better for broad crawls, see
+# https://docs.scrapy.org/en/latest/topics/broad-crawls.html
+SCHEDULER_PRIORITY_QUEUE = "scrapy.pqueues.DownloaderAwarePriorityQueue"
+
+# Custom settings
+RECIPES_OUTPUT_URI = os.getenv("RECIPES_OUTPUT_URI", "recipes_data")
+
+RECIPES_ERRORS_OUTPUT_URI = os.path.join(RECIPES_OUTPUT_URI, "recipe_errors.txt")
+
+# Scraper API proxy settings
+SCRAPER_API_ENABLED = bool(os.getenv("SCRAPER_API_ENABLED"))
+
+SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
+
+# Crawling breadth-first
+DEPTH_PRIORITY = 1
+SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
+SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
-# AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 2.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 

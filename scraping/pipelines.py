@@ -1,7 +1,10 @@
-import base64
+import hashlib
 import json
 import logging
+import os
+import shutil
 
+from fs import open_fs
 import scrapy
 
 from scraping.items import RecipeItem
@@ -15,34 +18,43 @@ class RecipePipeline:
 
     @classmethod
     def from_crawler(cls, crawler: scrapy.crawler.Crawler) -> "RecipePipeline":
-        return cls(
-            crawler.settings["JSON_OUTPUT_FILE"],
-            crawler.settings["OVERWRITE_OUTPUT_FILES"],
-        )
+        return cls(crawler.settings["RECIPES_OUTPUT_URI"])
 
-    def __init__(self, output_file: str, overwrite: bool) -> None:
-        self.output_file = output_file
-        self.stream = None
-        self.overwrite = overwrite
+    def __init__(self, output_uri: str) -> None:
+        self.output_uri = output_uri
+        self.filesystem = None
 
     def process_item(
         self, item: RecipeItem, spider: scrapy.Spider  # pylint: disable=unused-argument
     ) -> scrapy.Item:
         json_data = dict(item)
-        encoded_html = base64.b64encode(item["html"]).decode()
-        json_data["html"] = encoded_html
-        self.stream.write(json.dumps(json_data) + "\n")
+        html_data = json_data.pop("html")
+
+        url_hash = hashlib.sha1(item["url"].encode()).hexdigest()
+
+        if not self.filesystem.isdir(url_hash):
+            self.filesystem.makedirs(url_hash)
+
+        with self.filesystem.open(os.path.join(url_hash, "page.html"), "wb+") as file:
+            file.write(html_data)
+
+        with self.filesystem.open(
+            os.path.join(url_hash, "meta.json"), "w+", encoding="utf-8"
+        ) as file:
+            json.dump(json_data, file, indent=2, sort_keys=True)
+
         LOGGER.info("Processed %s", item["url"])
         return item
 
     def open_spider(
         self, spider: scrapy.Spider  # pylint: disable=unused-argument
     ) -> None:
-        mode = "w+" if self.overwrite else "a+"
-        self.stream = open(self.output_file, mode, encoding="utf-8")
+        LOGGER.info("Opened spider: %s; writing to %s", spider.name, self.output_uri)
+        self.filesystem = open_fs(self.output_uri, create=True)
 
-    def close_spider(
+    def close_spider(  # pylint: disable=no-self-use
         self, spider: scrapy.Spider  # pylint: disable=unused-argument
     ) -> None:
-        self.stream.close()
-        self.stream = None
+        LOGGER.info("Closed spider: %s", spider.name)
+        self.filesystem.close()
+        self.filesystem = None

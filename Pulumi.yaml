@@ -1,0 +1,4 @@
+name: recipes
+runtime:
+  name: python
+description: Recipe scraping

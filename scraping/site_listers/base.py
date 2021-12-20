@@ -87,7 +87,7 @@ class SitemapLister(SiteLister):
     def get_start_urls(self) -> Sequence[str]:
         return [self.start_url] + list(self.extra_start_urls)
 
-    def process_start_urls(
+    def process_start_urls(  # pylint: disable=no-self-use
         self, urls: Sequence[str], callback: PageCallback
     ) -> Iterator[scrapy.Request]:
         for url in urls:
@@ -115,8 +115,7 @@ class SitemapLister(SiteLister):
 
 
 class TwoLevelSitemapLister(SitemapLister):
-    """
-    """
+    """ """
 
     sitemap_path_regex: Optional[re.Pattern] = None
 

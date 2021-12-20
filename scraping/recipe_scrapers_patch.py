@@ -74,10 +74,13 @@ class PatchedBettyCrocker(BettyCrocker):  # pylint: disable=abstract-method
         ]
 
 
-class PatchedOneHundredOneCookbooks(OneHundredOneCookBooks):
+class PatchedOneHundredOneCookbooks(
+    OneHundredOneCookBooks
+):  # pylint: disable=abstract-method
     """
     Failing case: https://www.101cookbooks.com/millionaires-shortbread/
     """
+
     def title(self):
         title = self.soup.find("h1")
         if title is None:
@@ -91,12 +94,10 @@ def patch_betty_crocker() -> None:
 
 
 def patch_onehundredonecookbooks() -> None:
-    """
-    """
+    """ """
     SCRAPERS[OneHundredOneCookBooks.host()] = PatchedOneHundredOneCookbooks
 
 
 def patch_recipetineats() -> None:
-    """
-    """
+    """ """
     SCRAPERS["recipetineats.com"] = RecipieTinEats

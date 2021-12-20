@@ -119,7 +119,7 @@ class RecipeSpider(scrapy.Spider):
     ]
 
     def start_requests(self) -> Iterator[Any]:
-        # TODO: iterate through these "horizontally" so each generator
+        # TODO(cam): iterate through these "horizontally" so each generator
         # yields one request at once, should help slightly to distribute
         # requests
         for generator in self.recipe_generators:
@@ -147,7 +147,6 @@ class RecipeSpider(scrapy.Spider):
             "instructions": get_method_result(scraper.instructions),
             "image": get_method_result(scraper.image),
             "host": get_method_result(scraper.host),
-            "links": get_method_result(scraper.links),
             "nutrients": get_method_result(scraper.nutrients),
         }
 
