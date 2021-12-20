@@ -1,3 +1,8 @@
 *.pyc
 __pycache__/
 recipes_data/
+requirements.txt
+setup.py
+zyte_smartproxy_apikey.txt
+build/
+project.egg-info/

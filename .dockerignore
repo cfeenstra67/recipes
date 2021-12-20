@@ -1,0 +1,4 @@
+Pulumi*.yaml
+recipes_data/
+__main__.py
+zyte_smartproxy_apikey.txt
