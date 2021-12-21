@@ -1,37 +1,26 @@
-import dataclasses as dc
+import json
 
 import pulumi
-from awacs.aws import (
-    Allow,
-    PolicyDocument,
-    Principal,
-    Statement
-)
+from awacs import s3 as awacs_s3
+from awacs.aws import Allow, PolicyDocument, Principal, Statement, Action
 from awacs.ecr import (
     BatchGetImage,
     DescribeImages,
-    GetDownloadUrlForLayer
+    GetDownloadUrlForLayer,
+    GetAuthorizationToken,
+    BatchCheckLayerAvailability,
 )
-from awacs.helpers.trust import (
-    make_simple_assume_policy,
-    make_service_domain_name
-)
+from awacs.helpers.trust import make_simple_assume_policy, make_service_domain_name
 from pulumi_aws import s3, ecr, apprunner, iam
 
 
-@dc.dataclass(frozen=True)
-class AWSLiteral:
-    """
-    Literal for use w/ awacs
-    """
-    value: str
-
-    def JSONrepr(self) -> str:
-        return self.value
-
-
-def apprunner_assume_role_policy() -> PolicyDocument:
+def apprunner_build_assume_role_policy() -> PolicyDocument:
     domain = make_service_domain_name("build.apprunner")
+    return make_simple_assume_policy(domain)
+
+
+def apprunner_tasks_assume_role_policy() -> PolicyDocument:
+    domain = make_service_domain_name("tasks.apprunner")
     return make_simple_assume_policy(domain)
 
 
@@ -46,38 +35,92 @@ def apprunner_pull_images_policy(arn: str) -> PolicyDocument:
                 Action=[
                     BatchGetImage,
                     DescribeImages,
-                    GetDownloadUrlForLayer
+                    GetDownloadUrlForLayer,
+                    BatchCheckLayerAvailability,
                 ],
-                Resource=[AWSLiteral(arn)]
+                Resource=[arn],
+            ),
+            Statement(
+                Sid="2", Effect=Allow, Action=[GetAuthorizationToken], Resource=["*"]
+            ),
+        ],
+    )
+
+
+def apprunner_instance_policy(bucket: str) -> PolicyDocument:
+    return PolicyDocument(
+        Version="2012-10-17",
+        Id="apprunner-instance-role",
+        Statement=[
+            Statement(
+                Sid="1",
+                Effect=Allow,
+                Action=[Action("*")],
+                Resource=[awacs_s3.ARN(bucket), awacs_s3.ARN(f"{bucket}/*")],
             )
-        ]
+        ],
     )
 
 
 def main() -> None:
-    bucket = s3.Bucket(
-        "recipe-scraping",
-        acl="private",
-        force_destroy=True
+    bucket = s3.Bucket("recipe-scraping", acl="private", force_destroy=True)
+    repo = ecr.Repository("recipe-scraping")
+    repo_policy = ecr.LifecyclePolicy(
+        "recipe-scraping-policy",
+        repository=repo.name,
+        policy=json.dumps(
+            {
+                "rules": [
+                    {
+                        "rulePriority": 1,
+                        "description": "Expire images older than 1 day",
+                        "selection": {
+                            "tagStatus": "untagged",
+                            "countType": "sinceImagePushed",
+                            "countUnit": "days",
+                            "countNumber": 1,
+                        },
+                        "action": {"type": "expire"},
+                    }
+                ]
+            }
+        ),
     )
-    repo = ecr.Repository(
-        "recipe-scraping"
+
+    apprunner_role = iam.Role(
+        "apprunner-recipe-scraping",
+        assume_role_policy=apprunner_build_assume_role_policy().to_json(),
+        inline_policies=[
+            {
+                "name": "apprunner-pull-images",
+                "policy": repo.arn.apply(
+                    lambda x: apprunner_pull_images_policy(x).to_json()
+                ),
+            }
+        ],
+    )
+
+    apprunner_instance_role = iam.Role(
+        "apprunner-instance-role",
+        assume_role_policy=apprunner_tasks_assume_role_policy().to_json(),
+        inline_policies=[
+            {
+                "name": "apprunner-instance-policy",
+                "policy": bucket.bucket.apply(
+                    lambda x: apprunner_instance_policy(x).to_json()
+                ),
+            }
+        ],
+    )
+
+    service_autoscaling_configuration = apprunner.AutoScalingConfigurationVersion(
+        "recipe-scraping-autoscaling-config",
+        auto_scaling_configuration_name="recipe-scraping",
+        max_size=1,
     )
 
     image_id = repo.repository_url.apply("{}:latest".format)
     output_uri = bucket.bucket.apply("s3://{}/results".format)
-
-    apprunner_role = iam.Role(
-        "apprunner-recipe-scraping",
-        assume_role_policy=apprunner_assume_role_policy().to_json(),
-        inline_policies=[
-            {
-                "name": "apprunner-pull-images",
-                "policy": repo.arn.apply(lambda x: apprunner_pull_images_policy(x).to_json())
-            }
-        ]
-    )
-
     service = apprunner.Service(
         "recipe-scraping",
         service_name="recipe-scraping",
@@ -86,20 +129,19 @@ def main() -> None:
                 "image_identifier": image_id,
                 "image_repository_type": "ECR",
                 "image_configuration": {
-                    "runtime_environment_variables": {
-                        "RECIPES_OUTPUT_URI": output_uri
-                    }
-                }
+                    "runtime_environment_variables": {"RECIPES_OUTPUT_URI": output_uri}
+                },
             },
-            "authentication_configuration": {
-                "access_role_arn": apprunner_role.arn
-            }
-        }
+            "authentication_configuration": {"access_role_arn": apprunner_role.arn},
+        },
+        instance_configuration={"instance_role_arn": apprunner_instance_role.arn},
+        auto_scaling_configuration_arn=service_autoscaling_configuration.arn,
     )
 
     pulumi.export("bucket_name", bucket.id)
     pulumi.export("repo_url", repo.repository_url)
+    pulumi.export("service_url", service.service_url)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

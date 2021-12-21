@@ -1,10 +1,10 @@
 
 check:
-	poetry run black --check scraping
-	poetry run pylint scraping
+	poetry run black --check recipes __main__.py
+	poetry run pylint recipes
 
 fmt:
-	poetry run black scraping
+	poetry run black recipes __main__.py
 
 deploy-shub:
 	poetry export -f requirements.txt --output requirements.txt
@@ -12,7 +12,7 @@ deploy-shub:
 
 
 docker-build:
-	docker build -t recipes:latest .
+	docker buildx build  --platform linux/amd64 -t recipes:latest --load 
 
 docker-push: REPO_URL = $(shell pulumi stack output repo_url)
 docker-push:

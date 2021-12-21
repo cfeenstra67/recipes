@@ -54,9 +54,7 @@ SPIDER_MIDDLEWARES = {
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    'scrapy_zyte_smartproxy.ZyteSmartProxyMiddleware': 610
-}
+DOWNLOADER_MIDDLEWARES = {"scrapy_zyte_smartproxy.ZyteSmartProxyMiddleware": 610}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -86,8 +84,8 @@ ZYTE_SMARTPROXY_APIKEY = os.getenv("ZYTE_SMARTPROXY_APIKEY")
 
 # Crawling breadth-first
 DEPTH_PRIORITY = 1
-SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
-SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
+SCHEDULER_DISK_QUEUE = "scrapy.squeues.PickleFifoDiskQueue"
+SCHEDULER_MEMORY_QUEUE = "scrapy.squeues.FifoMemoryQueue"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

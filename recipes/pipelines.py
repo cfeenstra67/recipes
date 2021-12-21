@@ -2,7 +2,6 @@ import hashlib
 import json
 import logging
 import os
-import shutil
 
 from fs import open_fs
 import scrapy

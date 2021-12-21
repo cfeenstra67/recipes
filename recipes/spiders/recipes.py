@@ -73,7 +73,7 @@ class RecipeSpider(scrapy.Spider):
         site_listers.MyRecipesLister(),
         site_listers.NourishedByNutritionLister(),
         site_listers.NutritionByNathalieLister(),
-        site_listers._101CookbooksLister(),
+        site_listers._101CookbooksLister(),  # pylint: disable=protected-access
         site_listers.PaleoRunningMommaLister(),
         site_listers.PaniniHappyLister(),
         site_listers.PracticalSelfRelianceLister(),

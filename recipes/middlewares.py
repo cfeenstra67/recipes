@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from urllib.parse import urlencode
 
 from fs import open_fs
 from scrapy import signals
@@ -53,8 +52,8 @@ class RecipeErrorHandlerMiddleware:
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s", spider.name)
         dirname, filename = os.path.split(self.output_uri)
-        fs = self.filesystems[spider.name] = open_fs(dirname, create=True)
-        self.errors[spider.name] = fs.open(filename, "a+")
+        filesystem = self.filesystems[spider.name] = open_fs(dirname, create=True)
+        self.errors[spider.name] = filesystem.open(filename, "a+")
 
     def spider_closed(self, spider):
         spider.logger.info("Spider closed: %s", spider.name)
@@ -65,5 +64,5 @@ class RecipeErrorHandlerMiddleware:
             error_stream.close()
 
         if spider.name in self.filesystems:
-            fs = self.filesystems.pop(spider.name)
-            fs.close()
+            filesystem = self.filesystems.pop(spider.name)
+            filesystem.close()
