@@ -137,7 +137,7 @@ def main() -> None:
                     "runtime_environment_variables": {
                         "RECIPES_OUTPUT_URI": output_uri,
                         "USERNAME": ui_username,
-                        "PASSWORD": ui_password
+                        "PASSWORD": ui_password,
                     }
                 },
             },
