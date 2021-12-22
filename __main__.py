@@ -63,6 +63,11 @@ def apprunner_instance_policy(bucket: str) -> PolicyDocument:
 
 
 def main() -> None:
+
+    config = pulumi.Config()
+    ui_username = config.require("ui-username")
+    ui_password = config.require("ui-password")
+
     bucket = s3.Bucket("recipe-scraping", acl="private", force_destroy=True)
     repo = ecr.Repository("recipe-scraping")
     repo_policy = ecr.LifecyclePolicy(
@@ -129,7 +134,11 @@ def main() -> None:
                 "image_identifier": image_id,
                 "image_repository_type": "ECR",
                 "image_configuration": {
-                    "runtime_environment_variables": {"RECIPES_OUTPUT_URI": output_uri}
+                    "runtime_environment_variables": {
+                        "RECIPES_OUTPUT_URI": output_uri,
+                        "USERNAME": ui_username,
+                        "PASSWORD": ui_password
+                    }
                 },
             },
             "authentication_configuration": {"access_role_arn": apprunner_role.arn},

@@ -6,3 +6,5 @@ setup.py
 zyte_smartproxy_apikey.txt
 build/
 project.egg-info/
+/logs/
+/dbs/

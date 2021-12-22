@@ -12,7 +12,10 @@ deploy-shub:
 
 
 docker-build:
-	docker buildx build  --platform linux/amd64 -t recipes:latest --load 
+	docker build -t recipes-arm:latest .
+
+docker-build-amd64:
+	docker buildx build  --platform linux/amd64 -t recipes:latest --load .
 
 docker-push: REPO_URL = $(shell pulumi stack output repo_url)
 docker-push:

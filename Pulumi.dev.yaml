@@ -1,2 +1,5 @@
 config:
   aws:region: us-east-2
+  recipes:ui-password:
+    secure: AAABANrJouEkHwdrc2SmbEy1Mc/TMOV5gzp+0D+48fnzC+ZY35o2U/7GItKmzrLQ
+  recipes:ui-username: cam
