@@ -68,7 +68,12 @@ def main() -> None:
     ui_username = config.require("ui-username")
     ui_password = config.require("ui-password")
 
-    bucket = s3.Bucket("recipe-scraping", acl="private", force_destroy=True)
+    bucket = s3.Bucket(
+        "recipe-scraping",
+        acl="authenticated-read",
+        force_destroy=True,
+        request_payer="Requester",
+    )
     repo = ecr.Repository("recipe-scraping")
     repo_policy = ecr.LifecyclePolicy(
         "recipe-scraping-policy",
